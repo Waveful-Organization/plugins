@@ -6,7 +6,6 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSink;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
@@ -16,9 +15,9 @@ import java.util.Map;
 
 class CacheDataSourceFactory implements DataSource.Factory {
     private final Context context;
-    private DefaultDataSourceFactory defaultDatasourceFactory;
     private final long maxFileSize, maxCacheSize;
-    private DefaultHttpDataSource.Factory defaultHttpDataSourceFactory;
+    private final DefaultHttpDataSource.Factory defaultHttpDataSourceFactory;
+
     CacheDataSourceFactory(Context context, long maxCacheSize, long maxFileSize) {
         super();
         this.context = context;
@@ -28,13 +27,15 @@ class CacheDataSourceFactory implements DataSource.Factory {
                 .setUserAgent("ExoPlayer")
                 .setAllowCrossProtocolRedirects(true);
     }
+
     void setHeaders(Map<String, String> httpHeaders){
         defaultHttpDataSourceFactory.setDefaultRequestProperties(httpHeaders);
     }
+
     @Override
     public DataSource createDataSource() {
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter.Builder(context).build();
-        defaultDatasourceFactory = new DefaultDataSourceFactory(this.context,
+        DefaultDataSourceFactory defaultDatasourceFactory = new DefaultDataSourceFactory(this.context,
                 bandwidthMeter, defaultHttpDataSourceFactory);
         SimpleCache simpleCache = SimpleCacheSingleton.getInstance(context, maxCacheSize).simpleCache;
         return new CacheDataSource(simpleCache, defaultDatasourceFactory.createDataSource(),
