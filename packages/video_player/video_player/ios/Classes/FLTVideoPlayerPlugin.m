@@ -6,6 +6,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <GLKit/GLKit.h>
 #import "messages.h"
+#import <KTVHTTPCache/KTVHTTPCache.h>
 
 #if !__has_feature(objc_arc)
 #error Code Requires ARC.
@@ -476,6 +477,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 - (instancetype)initWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   self = [super init];
   NSAssert(self, @"super init cannot be nil");
+  [KTVHTTPCache proxyStart:nil];
   _registry = [registrar textures];
   _messenger = [registrar messenger];
   _registrar = registrar;
@@ -535,7 +537,9 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
     player = [[FLTVideoPlayer alloc] initWithAsset:assetPath frameUpdater:frameUpdater];
     return [self onPlayerSetup:player frameUpdater:frameUpdater];
   } else if (input.uri) {
-    player = [[FLTVideoPlayer alloc] initWithURL:[NSURL URLWithString:input.uri]
+    // player = [[FLTVideoPlayer alloc] initWithURL:[NSURL URLWithString:input.uri]
+    NSURL *proxyURL = [KTVHTTPCache proxyURLWithOriginalURL:[NSURL URLWithString:input.uri]];
+    player = [[FLTVideoPlayer alloc] initWithURL:proxyURL
                                     frameUpdater:frameUpdater
                                      httpHeaders:input.httpHeaders];
     return [self onPlayerSetup:player frameUpdater:frameUpdater];

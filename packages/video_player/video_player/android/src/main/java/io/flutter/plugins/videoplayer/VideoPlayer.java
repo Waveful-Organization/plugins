@@ -28,7 +28,6 @@ import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.view.TextureRegistry;
@@ -76,15 +75,16 @@ final class VideoPlayer {
 
     DataSource.Factory dataSourceFactory;
     if (isHTTP(uri)) {
-      DefaultHttpDataSource.Factory httpDataSourceFactory =
-          new DefaultHttpDataSource.Factory()
-              .setUserAgent("ExoPlayer")
-              .setAllowCrossProtocolRedirects(true);
-
+      CacheDataSourceFactory cacheDataSourceFactory =
+          new CacheDataSourceFactory(
+              context,
+                  // TODO: need a way to set these programmatically. Maybe fork VideoPlayerPlatformInterface
+                  1024*1024*1024,
+                  1024*1024*100);
       if (httpHeaders != null && !httpHeaders.isEmpty()) {
-        httpDataSourceFactory.setDefaultRequestProperties(httpHeaders);
+        cacheDataSourceFactory.setHeaders(httpHeaders);
       }
-      dataSourceFactory = httpDataSourceFactory;
+      dataSourceFactory = cacheDataSourceFactory;
     } else {
       dataSourceFactory = new DefaultDataSourceFactory(context, "ExoPlayer");
     }
