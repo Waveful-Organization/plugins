@@ -538,7 +538,14 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
     return [self onPlayerSetup:player frameUpdater:frameUpdater];
   } else if (input.uri) {
     // player = [[FLTVideoPlayer alloc] initWithURL:[NSURL URLWithString:input.uri]
+
+    // Create proxy URL using the cache framework.
     NSURL *proxyURL = [KTVHTTPCache proxyURLWithOriginalURL:[NSURL URLWithString:input.uri]];
+
+    // Set headers.
+    [KTVHTTPCache downloadSetAdditionalHeaders:input.httpHeaders];
+
+    // Initialize video player with the proxy url.
     player = [[FLTVideoPlayer alloc] initWithURL:proxyURL
                                     frameUpdater:frameUpdater
                                      httpHeaders:input.httpHeaders];
